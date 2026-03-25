@@ -12,7 +12,7 @@ from telegram.ext import (
 )
 from datetime import datetime
 
-TOKEN = "8383696890:AAHBxVs9t0CqQ7R9pkve76CVvUT243kVYnU"
+TOKEN = "8527070285:AAGsLZy6Gff0IYbXLLpvAFM-6P-S0Jki_nc"
 ADMIN_ID = 7957443258
 
 USUARIOS_FILE = "usuarios.json"
@@ -20,7 +20,21 @@ INTENTOS_FILE = "intentos.json"
 FUNCION17_FILE = "funcion17.json"
 PEDIDOS_FILE = "pedidos.json"
 
+MANTENIMIENTO = False
+estado_admin = {}
+estado_admin = {}
+usuarios = set()
+bloqueados = set()
+opcion17 = set()
 
+stats = {
+    "bloqueados": [],
+    "desbloqueados": [],
+    "agregados": [],
+    "eliminados": [],
+    "mantenimiento": 0,
+    "publicaciones": 0
+}
 # ------------------------
 # JSON
 # ------------------------
@@ -64,8 +78,8 @@ def esta_bloqueado(uid):
 # MENU
 # ------------------------
 
-menu_text = """âââââââââââââ
-OPCIONES DISPONIBLESð®
+menu_text = """━━━━━━━━━━━━━
+OPCIONES DISPONIBLES🎮
 
 1. Cromar calipers.
 2. Cromar luces.
@@ -83,15 +97,13 @@ OPCIONES DISPONIBLESð®
 14. Cuenta full.
 15. Auto Full GG.
 16. FULL GG PREMIUM
-17. Cuentas/DiseÃ±os.
-18. ðComandos (ðAdmin.)
-19. ðComandos (ðAdmin.)
-
-
-
-âââââââââââââ"""
-menu_admin = """âââââââââââââ
-ð PANEL ADMIN
+17. Cuentas/Diseños.
+18. 🔒Comandos (👑Admin.)
+19. 🔒Comandos (👑Admin.)
+20. 🔒Comandos (👑Admin.)
+━━━━━━━━━━━━━"""
+menu_admin = """━━━━━━━━━━━━━
+👑 PANEL ADMIN
 
 1. Cromar calipers
 2. Cromar luces
@@ -109,39 +121,63 @@ menu_admin = """âââââââââââ
 14. Cuenta full
 15. Auto Full GG
 16. FULL GG PREMIUM
-17. Cuentas/DiseÃ±os
+17. Cuentas/Diseños
 
-âââââââââââââ
-â ADMIN
+━━━━━━━━━━━━━
+⚙ ADMIN
 
 18. Panel Admin
 19. Ver Pedidos
-âââââââââââââ
+20. Mantenimiento of on 
+━━━━━━━━━━━━━
 """
+
+NOMBRES_OPCIONES = {
+    "1": "Cromar calipers",
+    "2": "Cromar luces",
+    "3": "Ventanas GG",
+    "4": "Modificar 1 HP",
+    "5": "Cromar rines",
+    "6": "Cromar aleron",
+    "7": "Traspasar auto",
+    "8": "Modificar shiftime",
+    "9": "Quitar parachoques",
+    "10": "Auto 6 segundos",
+    "11": "Modificar ID",
+    "12": "30k / 50M",
+    "13": "Comprar casas",
+    "14": "Cuenta full",
+    "15": "Auto Full GG",
+    "16": "FULL GG PREMIUM",
+    "17": "Cuentas/Diseños",
+    "18": "🔒Comandos (👑Admin.)",
+    "19": "🔒Comandos (👑Admin.)",
+    "20": "🔒Comandos (👑Admin.)"
+}
+
 FORMULARIOS = {
-"1":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta","ð Modelo del vehÃ­culo"],
-"2":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta","ð Modelo del vehÃ­culo"],
-"3":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta","ð Modelo del vehÃ­culo"],
-"4":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"5":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta","ð Modelo del vehÃ­culo"],
-"6":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta","ð Modelo del vehÃ­culo"],
-"7":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"8":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"9":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"10":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"11":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta", "Nuevo ID:"],
-"12":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"13":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"14":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta"],
-"15":["ð§ Correo electrÃ³nico","ð ContraseÃ±a de la cuenta","ð ID DEL AUTO"],
+"1":["📧 Correo electrónico","🔐 Contraseña de la cuenta","🚗 Modelo del vehículo"],
+"2":["📧 Correo electrónico","🔐 Contraseña de la cuenta","🚗 Modelo del vehículo"],
+"3":["📧 Correo electrónico","🔐 Contraseña de la cuenta","🚗 Modelo del vehículo"],
+"4":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"5":["📧 Correo electrónico","🔐 Contraseña de la cuenta","🚗 Modelo del vehículo"],
+"6":["📧 Correo electrónico","🔐 Contraseña de la cuenta","🚗 Modelo del vehículo"],
+"7":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"8":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"9":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"10":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"11":["📧 Correo electrónico","🔐 Contraseña de la cuenta", "Nuevo ID:"],
+"12":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"13":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"14":["📧 Correo electrónico","🔐 Contraseña de la cuenta"],
+"15":["📧 Correo electrónico","🔐 Contraseña de la cuenta","🚗 ID DEL AUTO"],
 "16":[
-"ð§ Correo electrÃ³nico",
-"ð ContraseÃ±a de la cuenta",
-"ð Modelo del vehÃ­culo"
+"📧 Correo electrónico",
+"🔐 Contraseña de la cuenta",
+"🚗 Modelo del vehículo"
 ],
 "17":[],
 }
-
 OPCIONES_CON_COLOR={"1","2","3","5","6","15"}
 OPCION_FULL_GG = "16"
 
@@ -152,7 +188,14 @@ user_states={}
 # START
 # ------------------------
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    uid = update.effective_user.id
+
+    if MANTENIMIENTO and not es_admin(uid):
+        await update.message.reply_text("🛠 Bot en mantenimiento, intenta más tarde")
+        return
 
     user = update.effective_user
     uid = user.id
@@ -160,55 +203,54 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if esta_bloqueado(uid):
         return
+    # 🔥 CANCELAR FORMULARIO SI EXISTE
+    if uid in user_states:
+        del user_states[uid]
+    # 🔹 BOTÓN
+    botones = [
+        [InlineKeyboardButton("👥 Grupo oficial", url="https://t.me/+RrL593ltDKgwMDJh")]
+    ]
+    teclado = InlineKeyboardMarkup(botones)
 
-    # USUARIOS AUTORIZADOS
+    # 🔥 USUARIOS AUTORIZADOS
     if esta_autorizado(uid):
 
+        # 1️⃣ MENÚ + BOTÓN
         if es_admin(uid):
-            await update.message.reply_text(menu_admin)
+            await update.message.reply_text(menu_admin, reply_markup=teclado)
         else:
-            await update.message.reply_text(menu_text)
+            await update.message.reply_text(menu_text, reply_markup=teclado)
 
+        # 2️⃣ MENSAJE FINAL (YA BIEN COLOCADO)
         await update.message.reply_text(
-            "Elige una funciÃ³n respondiendo con el nÃºmero correspondiente:"
+            "Elige una función respondiendo con el número correspondiente:"
         )
+
         return
 
-    # USUARIO NO AUTORIZADO
+    # ❌ USUARIO NO AUTORIZADO
     intentos[uid_str] = intentos.get(uid_str, 0) + 1
     guardar_json(INTENTOS_FILE, intentos)
 
     if intentos[uid_str] >= 3:
 
         await update.message.reply_text(
-            "ð« Has sido bloqueado permanentemente por intentar explotar el bot. Si crees que es un error, contacta al administrador."
+            "🚫 Has sido bloqueado permanentemente por intentar explotar el bot."
         )
 
         fecha = datetime.now().strftime("%d/%m/%Y")
         hora = datetime.now().strftime("%H:%M:%S")
 
-        texto = f"""ð«âââââââââââââââââð«
-      ð«  USUARIO BLOQUEADO  ð«
-ð«âââââââââââââââââð«
+        texto = f"""🚫══════════════════🚫
+🚫  USUARIO BLOQUEADO  🚫
+🚫══════════════════🚫
 
-ð¤  NOMBRE
-ââ¤ {user.first_name}
+👤 {user.first_name}
+🔗 @{user.username}
+🆔 {user.id}
 
-ð  USUARIO
-ââ¤ @{user.username}
-
-ð  ID DEL USUARIO
-ââ¤ {user.id}
-
-ð  FECHA
-ââ¤ {fecha}
-
-â°  HORA
-ââ¤ {hora}
-
-â ï¸ ACCESO DENEGADO
-Este usuario se encuentra en la
-lista de usuarios bloqueados.
+📅 {fecha}
+⏰ {hora}
 """
 
         fotos = await context.bot.get_user_profile_photos(uid)
@@ -222,8 +264,10 @@ lista de usuarios bloqueados.
         return
 
     await update.message.reply_text(
-        "ð« No tienes acceso a este bot. Contacta al administrador @drillscars para solicitar acceso."
+        "🚫 No tienes acceso. Contacta al admin.",
+       
     )
+    
 # ------------------------
 # MANEJO FORMULARIOS
 # ------------------------
@@ -233,99 +277,412 @@ async def manejar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
     texto = update.message.text.strip()
 
-    opciones_validas = list(FORMULARIOS.keys()) + ["17","18","19"]
+    # 🔥 RESPUESTAS DEL ADMIN (PRIORIDAD)
+    if uid in estado_admin:
 
-    if texto not in opciones_validas and uid not in user_states:
-        await update.message.reply_text("â Ese comando no existe")
+        accion = estado_admin[uid]
+
+        # 🔥 CASO ESPECIAL: UPDATE GLOBAL
+        if accion == "esperando_update":
+
+            detalles = texto
+
+            mensaje = f"""🟢 BOT FUNCIONANDO DE NUEVO
+
+✨ ACTUALIZACIÓN:
+
+{detalles}
+
+🚀 Gracias por tu paciencia.
+"""
+
+            for u in usuarios:
+                try:
+                    await context.bot.send_message(int(u), mensaje)
+                except:
+                    pass
+
+            del estado_admin[uid]
+            await update.message.reply_text("✅ Actualización enviada")
+            return
+
+        # 🔥 VALIDAR ID
+        if not texto.isdigit():
+            await update.message.reply_text("❌ ID inválido")
+            return
+
+        target = int(texto)
+
+        if accion == "agregar":
+            usuarios.add(target)
+            stats["agregados"].append(target)
+            await update.message.reply_text("✅ Usuario agregado")
+
+        elif accion == "eliminar":
+            usuarios.discard(target)
+            stats["eliminados"].append(target)
+            await update.message.reply_text("❌ Usuario eliminado")
+
+        elif accion == "bloquear":
+            bloqueados.add(target)
+            stats["bloqueados"].append(target)
+            await update.message.reply_text("🚫 Usuario bloqueado")
+
+        elif accion == "desbloquear":
+            bloqueados.discard(target)
+            stats["desbloqueados"].append(target)
+            await update.message.reply_text("✅ Usuario desbloqueado")
+
+        elif accion == "add17":
+            opcion17.add(target)
+            await update.message.reply_text("⭐ Opción 17 agregada")
+
+        elif accion == "remove17":
+            opcion17.discard(target)
+            await update.message.reply_text("❌ Opción 17 quitada")
+
+        del estado_admin[uid]
         return
 
+    # 🔥 MANTENIMIENTO
+    if MANTENIMIENTO and not es_admin(uid):
+        await update.message.reply_text("🛠 Bot en mantenimiento, intenta más tarde")
+        return
 
-    # ð¹ OPCION 18
+    # 🔥 FORMULARIOS (PRIORIDAD ALTA)
+    if uid in user_states:
+
+        estado = user_states[uid]
+
+        # VALIDACIONES
+        if estado["paso"] == 0:
+            if "@" not in texto or "." not in texto:
+                await update.message.reply_text("❌ Correo inválido")
+                return
+
+        elif estado["paso"] == 1:
+            if len(texto) < 6:
+                await update.message.reply_text("❌ Contraseña muy corta")
+                return
+
+        elif estado["paso"] == 2:
+            if not texto.isdigit():
+                await update.message.reply_text("❌ Solo números en modelo")
+                return
+
+        estado["respuestas"].append(texto)
+        estado["paso"] += 1
+
+        # SIGUIENTE PREGUNTA
+        if estado["paso"] < len(estado["preguntas"]):
+            await update.message.reply_text(
+                estado["preguntas"][estado["paso"]] + ":"
+            )
+            return
+
+        opcion = estado["opcion"]
+
+        # ⭐ OPCIÓN 16
+        if opcion == "16":
+
+            keyboard = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton("🔴 Rojo", callback_data="aleron_rojo"),
+                    InlineKeyboardButton("🔵 Azul", callback_data="aleron_azul")
+                ],
+                [
+                    InlineKeyboardButton("🟢 Verde", callback_data="aleron_verde"),
+                    InlineKeyboardButton("⚪ Blanco", callback_data="aleron_blanco")
+                ]
+            ])
+
+            await update.message.reply_text(
+                "🎨 Selecciona color del alerón",
+                reply_markup=keyboard
+            )
+            return
+
+        # 🔹 OPCIONES CON COLOR
+        if opcion in OPCIONES_CON_COLOR:
+
+            keyboard = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton("🔴 Rojo", callback_data="color_rojo"),
+                    InlineKeyboardButton("🔵 Azul", callback_data="color_azul")
+                ],
+                [
+                    InlineKeyboardButton("🟢 Verde", callback_data="color_verde"),
+                    InlineKeyboardButton("⚪ Blanco", callback_data="color_blanco")
+                ]
+            ])
+
+            await update.message.reply_text(
+                "🎨 Selecciona color",
+                reply_markup=keyboard
+            )
+            return
+
+        # 🔹 SIN COLOR
+        await enviar_admin(update, context, estado, "N/A")
+        del user_states[uid]
+        return
+
+    # ---------------------------
+    # 🔽 AQUÍ YA VAN LOS COMANDOS
+    # ---------------------------
+
+
+    opciones_validas = list(FORMULARIOS.keys()) + ["17", "18", "19", "20", "21"]
+
+    # ❌ comando inválido
+    if texto not in opciones_validas and uid not in user_states:
+            await update.message.reply_text("❌ Ese comando no existe")
+            return
+    
+    # 🔹 OPCION 20 (MANTENIMIENTO)
+    # 🔹 OPCION 20 (MANTENIMIENTO)
+    if texto == "21":
+
+        if not es_admin(uid):
+            await update.message.reply_text("❌ Solo admin")
+            return
+
+        botones = [
+        [InlineKeyboardButton("➕ Agregar", callback_data="admin_agregar"),
+         InlineKeyboardButton("➖ Eliminar", callback_data="admin_eliminar")],
+
+        [InlineKeyboardButton("🚫 Bloquear", callback_data="admin_bloquear"),
+         InlineKeyboardButton("✅ Desbloquear", callback_data="admin_desbloquear")],
+
+        [InlineKeyboardButton("⭐ Dar opción 17", callback_data="admin_add17"),
+         InlineKeyboardButton("❌ Quitar opción 17", callback_data="admin_remove17")],
+
+        [InlineKeyboardButton("👥 Ver usuarios", callback_data="admin_ver")],
+        [InlineKeyboardButton("📊 Estadísticas", callback_data="admin_stats")]
+    ]
+
+        await update.message.reply_text(
+        "⚙️ Panel Admin",
+        reply_markup=InlineKeyboardMarkup(botones)
+    )
+        return
+    # 🔹 OPCION 18
     if texto == "18":
 
         tiempo = funcion17.get(str(uid))
 
         if not tiempo or tiempo < time.time():
-            await update.message.reply_text("â No tienes acceso a funciÃ³n 17")
+            await update.message.reply_text("❌ No tienes acceso a función 17")
             return
 
-        await update.message.reply_text("ðÂ¡Bienvenido Admin!")
-
         botones = [[
-            InlineKeyboardButton("ð¢ Canal", url="https://t.me/bot_multifunciones_cpm_drill_bot"),
-            InlineKeyboardButton("ðÂ¡Comandos Admin!", callback_data="comando"),
-            InlineKeyboardButton("respuestas", callback_data="respuestas")
+            InlineKeyboardButton("📢 Canal", url="https://t.me/bot_multifunciones_cpm_drill_bot"),
+            InlineKeyboardButton("👑 Comandos Admin", callback_data="comando"),
+            InlineKeyboardButton("Respuestas", callback_data="respuestas")
         ]]
 
-        teclado = InlineKeyboardMarkup(botones)
-
         await update.message.reply_text(
-            "âï¸ Panel de la funciÃ³n 17",
-            reply_markup=teclado
+            "⚙️ Panel de la función 17",
+            reply_markup=InlineKeyboardMarkup(botones)
         )
         return
 
-
-    # ð¹ OPCION 19
+    # 🔹 OPCION 19
     if texto == "19":
 
         if not es_admin(uid):
-            await update.message.reply_text("â Solo admin puede usar esto")
+            await update.message.reply_text("❌ Solo admin puede usar esto")
             return
 
         if not pedidos:
-            await update.message.reply_text("ð¦ No hay pedidos pendientes")
+            await update.message.reply_text("📦 No hay pedidos pendientes")
             return
 
+    # 🔹 MOSTRAR PEDIDOS
         for i, p in enumerate(pedidos):
+            mensaje = f"""📦 PEDIDO #{i+1}
 
-            mensaje = f"""ð¦ PEDIDO #{i+1}
+👤 Usuario: @{p['usuario']}
+🆔 ID: {p['id']}
 
-ð¤ Usuario: @{p['usuario']}
-ð ID: {p['id']}
+📌 Opción: {p['opcion']}
+📧 Correo: {p['correo']}
+🎨 Color: {p['color']}
 
-ð OpciÃ³n: {p['opcion']}
-ð§ Correo: {p['correo']}
-ð¨ Color: {p['color']}
+📅 {p['fecha']} ⏰ {p['hora']}
 
-ð {p['fecha']}  â° {p['hora']}
-
-ââââââââââââââââââ
+━━━━━━━━━━━━━━━━━━
 {p['datos']}
 """
 
             botones = [[
-                InlineKeyboardButton("â Completar", callback_data=f"completar_{i}")
-            ]]
+                InlineKeyboardButton("✅ Completar", callback_data=f"completar_{i}")
+        ]]
 
             await update.message.reply_text(
                 mensaje,
                 reply_markup=InlineKeyboardMarkup(botones)
-            )
+        )
+
+        # 🔥 ESTADÍSTICAS
+        total = len(pedidos)
+
+        # 📊 Función más usada
+        conteo_opciones = {}
+        for p in pedidos:
+            op = p["opcion"]
+            conteo_opciones[op] = conteo_opciones.get(op, 0) + 1
+
+        if conteo_opciones:
+            mas_usada = max(conteo_opciones, key=conteo_opciones.get)
+            nombre_funcion = NOMBRES_OPCIONES.get(mas_usada, f"Opción {mas_usada}")
+            veces_opcion = conteo_opciones[mas_usada]
+        else:
+            mas_usada = "N/A"
+            veces_opcion = 0
+
+    # 👤 Usuario más activo
+        conteo_usuarios = {}
+        for p in pedidos:
+            user = p["usuario"] or "Sin username"
+            conteo_usuarios[user] = conteo_usuarios.get(user, 0) + 1
+
+        if conteo_usuarios:
+            top_user = max(conteo_usuarios, key=conteo_usuarios.get)
+            veces_user = conteo_usuarios[top_user]
+        else:
+            top_user = "N/A"
+            veces_user = 0
+
+    # 🧾 MENSAJE FINAL
+        mensaje_stats = f"""📊 ESTADÍSTICAS
+
+📦 Total pedidos: {total}
+🔥 Función más usada: {nombre_funcion} ({veces_opcion} veces)
+
+👑 Usuario más activo: @{top_user}
+📨 Pedidos realizados: {veces_user}
+"""
+
+        await update.message.reply_text(mensaje_stats)
+
+    # 🔥 BOTÓN BORRAR TODOS
+        keyboard = [[
+            InlineKeyboardButton("🗑 Borrar TODOS los pedidos", callback_data="borrar_todos")
+    ]]
+
+        await update.message.reply_text(
+            "⚠️ Acción peligrosa",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+        return
+    # 🔹 OPCION 19
+    if texto == "19":
+
+        if not es_admin(uid):
+            await update.message.reply_text("❌ Solo admin puede usar esto")
+            return
+
+        if not pedidos:
+            await update.message.reply_text("📦 No hay pedidos pendientes")
+            return
+
+    # 🔹 MOSTRAR PEDIDOS
+        for i, p in enumerate(pedidos):
+            mensaje = f"""📦 PEDIDO #{i+1}
+
+👤 Usuario: @{p['usuario']}
+🆔 ID: {p['id']}
+
+📌 Opción: {p['opcion']}
+📧 Correo: {p['correo']}
+🎨 Color: {p['color']}
+
+📅 {p['fecha']} ⏰ {p['hora']}
+
+━━━━━━━━━━━━━━━━━━
+{p['datos']}
+"""
+
+            botones = [[
+                InlineKeyboardButton("✅ Completar", callback_data=f"completar_{i}")
+        ]]
+
+            await update.message.reply_text(
+                mensaje,
+                reply_markup=InlineKeyboardMarkup(botones)
+        )
+
+        # 🔥 ESTADÍSTICAS
+        total = len(pedidos)
+
+        # 📊 Función más usada
+        conteo_opciones = {}
+        for p in pedidos:
+            op = p["opcion"]
+            conteo_opciones[op] = conteo_opciones.get(op, 0) + 1
+
+        if conteo_opciones:
+            mas_usada = max(conteo_opciones, key=conteo_opciones.get)
+            nombre_funcion = NOMBRES_OPCIONES.get(mas_usada, f"Opción {mas_usada}")
+            veces_opcion = conteo_opciones[mas_usada]
+        else:
+            mas_usada = "N/A"
+            veces_opcion = 0
+
+    # 👤 Usuario más activo
+        conteo_usuarios = {}
+        for p in pedidos:
+            user = p["usuario"] or "Sin username"
+            conteo_usuarios[user] = conteo_usuarios.get(user, 0) + 1
+
+        if conteo_usuarios:
+            top_user = max(conteo_usuarios, key=conteo_usuarios.get)
+            veces_user = conteo_usuarios[top_user]
+        else:
+            top_user = "N/A"
+            veces_user = 0
+
+    # 🧾 MENSAJE FINAL
+        mensaje_stats = f"""📊 ESTADÍSTICAS
+
+📦 Total pedidos: {total}
+🔥 Función más usada: {nombre_funcion} ({veces_opcion} veces)
+
+👑 Usuario más activo: @{top_user}
+📨 Pedidos realizados: {veces_user}
+"""
+
+        await update.message.reply_text(mensaje_stats)
+
+    # 🔥 BOTÓN BORRAR TODOS
+        keyboard = [[
+            InlineKeyboardButton("🗑 Borrar TODOS los pedidos", callback_data="borrar_todos")
+    ]]
+
+        await update.message.reply_text(
+            "⚠️ Acción peligrosa",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
         return
 
-
-    # ð¹ OPCION 17
+    # 🔹 OPCION 17
     if texto == "17":
-
-        await update.message.reply_text("Â¡Selecciona Un Bot!")
 
         botones = [[
             InlineKeyboardButton("Bot Cuentas", url="https://t.me/bot_acuunts_drills_bot"),
-            InlineKeyboardButton("Bot DiseÃ±os", url="https://t.me/personalizados_drills_bot")
+            InlineKeyboardButton("Bot Diseños", url="https://t.me/personalizados_drills_bot")
         ]]
 
-        teclado = InlineKeyboardMarkup(botones)
-
         await update.message.reply_text(
-            "Bots Disponibles:",
-            reply_markup=teclado
+            "Bots disponibles:",
+            reply_markup=InlineKeyboardMarkup(botones)
         )
         return
 
-
-    # ð¹ FORMULARIOS
+    # 🔹 FORMULARIOS
     if texto in FORMULARIOS:
 
         user_states[uid] = {
@@ -335,115 +692,86 @@ async def manejar(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "paso": 0
         }
 
-        await update.message.reply_text(FORMULARIOS[texto][0] + ":")
+        if FORMULARIOS[texto]:
+            await update.message.reply_text(FORMULARIOS[texto][0] + ":")
         return
 
-
-    
-    # ð¹ PROCESO DE RESPUESTAS
+    # 🔹 RESPUESTAS
     if uid in user_states:
 
         estado = user_states[uid]
 
-    # VALIDAR CORREO
-    if estado["paso"] == 0:
-        if "@" not in texto or "." not in texto:
+        # VALIDACIONES
+        if estado["paso"] == 0:
+            if "@" not in texto or "." not in texto:
+                await update.message.reply_text("❌ Correo inválido")
+                return
+
+        if estado["paso"] == 1:
+            if len(texto) < 6:
+                await update.message.reply_text("❌ Contraseña muy corta")
+                return
+
+        if estado["paso"] == 2:
+            if not texto.isdigit():
+                await update.message.reply_text("❌ Solo números en modelo")
+                return
+
+        estado["respuestas"].append(texto)
+        estado["paso"] += 1
+
+        # siguiente pregunta
+        if estado["paso"] < len(estado["preguntas"]):
             await update.message.reply_text(
-                "â Correo invÃ¡lido.\n\nDebe contener @ y .\nEjemplo: correo@gmail.com"
+                estado["preguntas"][estado["paso"]] + ":"
             )
             return
 
-    # VALIDAR CONTRASEÃA
-    if estado["paso"] == 1:
-        if len(texto) < 6:
-            await update.message.reply_text(
-                "â ContraseÃ±a invÃ¡lida.\n\nDebe tener mÃ­nimo 6 caracteres."
-            )
-            return
+        opcion = estado["opcion"]
 
-    # VALIDAR MODELO DEL AUTO (SOLO NÃMEROS)
-    if estado["paso"] == 2:
-        if not texto.isdigit():
-            await update.message.reply_text(
-                "â Modelo invÃ¡lido.\n\nSolo se permiten nÃºmeros."
-            )
-            return
-
-    estado["respuestas"].append(texto)
-    estado["paso"] += 1
-
-    if estado["paso"] < len(estado["preguntas"]):
-        await update.message.reply_text(
-            estado["preguntas"][estado["paso"]] + ":"
-        )
-        return
-
-    opcion = estado["opcion"]
-
-
-        # â­ OPCION 16 FULL GG PREMIUM
-    if opcion == "16":
+        # ⭐ OPCION 16 FULL GG PREMIUM
+        if opcion == "16":
 
             keyboard = InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("ð´ Rojo",callback_data="aleron_rojo"),
-                    InlineKeyboardButton("ðµ Azul",callback_data="aleron_azul")
+                    InlineKeyboardButton("🔴 Rojo", callback_data="aleron_rojo"),
+                    InlineKeyboardButton("🔵 Azul", callback_data="aleron_azul")
                 ],
                 [
-                    InlineKeyboardButton("ð¢ Verde",callback_data="aleron_verde"),
-                    InlineKeyboardButton("âª Blanco",callback_data="aleron_blanco")
+                    InlineKeyboardButton("🟢 Verde", callback_data="aleron_verde"),
+                    InlineKeyboardButton("⚪ Blanco", callback_data="aleron_blanco")
                 ]
             ])
 
-            estado["paso_color"] = "aleron"
-
             await update.message.reply_text(
-                "ð¨ Selecciona color del alerÃ³n",
+                "🎨 Selecciona color del alerón",
                 reply_markup=keyboard
             )
             return
 
-        # ð¹ OPCIONES NORMALES CON COLOR
-    if opcion in OPCIONES_CON_COLOR:
+        # 🔹 OPCIONES CON COLOR
+        if opcion in OPCIONES_CON_COLOR:
 
             keyboard = InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("ð´ Rojo",callback_data="color_rojo"),
-                    InlineKeyboardButton("ðµ Azul",callback_data="color_azul")
+                    InlineKeyboardButton("🔴 Rojo", callback_data="color_rojo"),
+                    InlineKeyboardButton("🔵 Azul", callback_data="color_azul")
                 ],
                 [
-                    InlineKeyboardButton("ð¢ Verde",callback_data="color_verde"),
-                    InlineKeyboardButton("ðµAzul Claro",callback_data="color_azul_claro")
-                ],
-                [
-                    InlineKeyboardButton("ð Naranja",callback_data="color_naranja"),
-                    InlineKeyboardButton("ð©·rosa",callback_data="color_rosa")
-                ],
-                [
-                    InlineKeyboardButton("ð£Purpura",callback_data="color_purpura"),
-                    InlineKeyboardButton("âªBlanco",callback_data="color_blanco")
-                ],
-                [
-                    InlineKeyboardButton("ð¡Amarillo",callback_data="color_amarillo"),
-                    InlineKeyboardButton("ð£Violeta Obscuro",callback_data="color_violeta__obscuro")
-                ],
-                [
-                    InlineKeyboardButton("ðµTurqueza",callback_data="color_turqueza"),
-                    InlineKeyboardButton("ð¦Azul Marino",callback_data="color_azul-marino")
+                    InlineKeyboardButton("🟢 Verde", callback_data="color_verde"),
+                    InlineKeyboardButton("⚪ Blanco", callback_data="color_blanco")
                 ]
             ])
 
-            estado["esperando_color"] = True
-
             await update.message.reply_text(
-                "ð¨ Selecciona color",
+                "🎨 Selecciona color",
                 reply_markup=keyboard
             )
             return
 
-    await enviar_admin(update, context, estado, "N/A")
-
-    del user_states[uid]
+        # 🔹 SIN COLOR
+        await enviar_admin(update, context, estado, "N/A")
+        del user_states[uid]
 # ------------------------
 # COLOR
 # ------------------------
@@ -559,6 +887,7 @@ Calipers: {estado['color_calipers']}
 
 async def enviar_admin(update_or_query, context, estado, color):
 
+    # 🔹 detectar usuario correctamente
     if hasattr(update_or_query, "effective_user"):
         user = update_or_query.effective_user
     else:
@@ -568,7 +897,6 @@ async def enviar_admin(update_or_query, context, estado, color):
     hora = datetime.now().strftime("%H:%M:%S")
 
     datos = ""
-
     for p, r in zip(estado["preguntas"], estado["respuestas"]):
         datos += f"{p}: {r}\n"
 
@@ -586,29 +914,221 @@ async def enviar_admin(update_or_query, context, estado, color):
     pedidos.append(pedido)
     guardar_json(PEDIDOS_FILE, pedidos)
 
-    await context.bot.send_message(
-        ADMIN_ID,
-        f"""ð¦ ââââã NUEVO PEDIDO ãââââ ð¦
+    # 🔥 MENSAJE AL ADMIN (ARREGLADO SIN BUG DE CARACTERES)
+    mensaje_admin = f"""📦 ━━━━【 NUEVO PEDIDO 】━━━━ 📦
 
-ð¤ Usuario: @{user.username}
-ð ID: {user.id}
+👤 Usuario: @{user.username}
+🆔 ID: {user.id}
 
-ð OpciÃ³n: {estado['opcion']}
-ð¨ Color: {color}
+📌 Opción: {estado['opcion']}
+🎨 Color: {color}
 
-ð Fecha: {fecha}
-â° Hora: {hora}
+📅 Fecha: {fecha}
+⏰ Hora: {hora}
 
-ââââââââââââââââââ
+━━━━━━━━━━━━━━━━━━
 {datos}
 """
-    )
 
-    await context.bot.send_message(user.id,"â Pedido enviado")
-    await context.bot.send_message(user.id,menu_text)
-    await update_or_query.message.reply_text(
-"Elige una funciÃ³n respondiendo con el nÃºmero correspondiente:"
-)
+    await context.bot.send_message(ADMIN_ID, mensaje_admin)
+
+    # 🔥 CONFIRMACIÓN AL USUARIO
+    await context.bot.send_message(user.id, "✅ Pedido enviado")
+
+    # 🔥 MENÚ CORRECTO SEGÚN USUARIO
+    if es_admin(user.id):
+        await context.bot.send_message(user.id, menu_admin)
+    else:
+        await context.bot.send_message(user.id, menu_text)
+
+    # 🔥 MENSAJE FINAL SEGURO (sirve para message y callback)
+    if hasattr(update_or_query, "message") and update_or_query.message:
+        await update_or_query.message.reply_text(
+            "Elige una función respondiendo con el número correspondiente:"
+        )
+
+
+async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    uid = query.from_user.id
+    data = query.data
+
+    # 🔹 AGREGAR
+    if data == "admin_agregar":
+        estado_admin[uid] = "agregar"
+        await query.message.reply_text("🆔 Envía el ID a agregar")
+
+    elif data == "admin_eliminar":
+        estado_admin[uid] = "eliminar"
+        await query.message.reply_text("🆔 Envía el ID a eliminar")
+
+    elif data == "admin_bloquear":
+        estado_admin[uid] = "bloquear"
+        await query.message.reply_text("🆔 ID a bloquear")
+
+    elif data == "admin_desbloquear":
+        estado_admin[uid] = "desbloquear"
+        await query.message.reply_text("🆔 ID a desbloquear")
+
+    elif data == "admin_add17":
+        estado_admin[uid] = "add17"
+        await query.message.reply_text("🆔 ID para opción 17")
+
+    elif data == "admin_remove17":
+        estado_admin[uid] = "remove17"
+        await query.message.reply_text("🆔 ID para quitar opción 17")
+
+    # 👥 VER USUARIOS
+    elif data == "admin_ver":
+
+        for u in usuarios:
+            try:
+                fotos = await context.bot.get_user_profile_photos(int(u))
+
+                if fotos.total_count > 0:
+                    file = fotos.photos[0][-1].file_id
+                    await context.bot.send_photo(uid, file, caption=f"ID: {u}")
+                else:
+                    await context.bot.send_message(uid, f"ID: {u}")
+            except:
+                pass
+
+    # 📊 ESTADÍSTICAS
+    elif data == "admin_stats":
+
+        mensaje = f"""📊 ESTADÍSTICAS
+
+👥 Agregados: {len(stats['agregados'])}
+🚫 Bloqueados: {len(stats['bloqueados'])}
+✅ Desbloqueados: {len(stats['desbloqueados'])}
+➖ Eliminados: {len(stats['eliminados'])}
+
+🛠 Mantenimiento usado: {stats['mantenimiento']}
+📢 Publicaciones: {stats['publicaciones']}
+"""
+
+        await query.message.reply_text(mensaje)
+
+        # 🔥 RESETEAR
+        stats["agregados"].clear()
+        stats["bloqueados"].clear()
+        stats["desbloqueados"].clear()
+        stats["eliminados"].clear()
+        stats["mantenimiento"] = 0
+        stats["publicaciones"] = 0
+    # 🟢 ACTIVAR
+async def mantenimiento_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    global MANTENIMIENTO
+
+    query = update.callback_query
+    uid = query.from_user.id
+    data = query.data
+
+    await query.answer()
+
+    if not es_admin(uid):
+        return
+
+    # 🟢 ACTIVAR
+    if data == "mantenimiento_on":
+
+        MANTENIMIENTO = True
+
+        await query.edit_message_text("🛠 Bot en mantenimiento ACTIVADO")
+
+        # avisar usuarios
+        for u in usuarios:
+            try:
+                await context.bot.send_message(
+                    chat_id=int(u),
+                    text="🛠 El bot está en mantenimiento\nIntenta más tarde."
+                )
+            except:
+                pass
+
+    # 🔴 DESACTIVAR
+    elif data == "mantenimiento_off":
+
+        MANTENIMIENTO = False
+
+        botones = [[
+            InlineKeyboardButton("✅ Sí hubo actualización", callback_data="update_si"),
+            InlineKeyboardButton("❌ No", callback_data="update_no")
+        ]]
+
+        await query.edit_message_text(
+            "🟢 Bot funcionando nuevamente\n\n¿Hubo actualización?",
+            reply_markup=InlineKeyboardMarkup(botones)
+        )
+
+async def actualizacion_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    uid = query.from_user.id
+    data = query.data
+
+    await query.answer()
+
+    if not es_admin(uid):
+        return
+
+    # ✅ SI HUBO UPDATE
+    if data == "update_si":
+
+        estado_admin[uid] = "esperando_update"
+
+        await query.message.reply_text("✍️ Escribe los detalles de la actualización")
+
+    # ❌ NO HUBO
+    elif data == "update_no":
+
+        await query.edit_message_text("🟢 Bot activo nuevamente")
+
+        for u in usuarios:
+            try:
+                await context.bot.send_message(
+                    chat_id=int(u),
+                    text="🟢 El bot ya está activo nuevamente"
+                )
+            except:
+                pass
+
+async def borrar_pedidos_botones(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    # 🔥 CONFIRMAR BORRADO
+    if query.data == "borrar_todos":
+
+        keyboard = [
+            [
+                InlineKeyboardButton("✅ Sí", callback_data="confirmar_borrar"),
+                InlineKeyboardButton("❌ No", callback_data="cancelar_borrar")
+            ]
+        ]
+
+        await query.message.reply_text(
+            "⚠️ ¿Seguro que quieres borrar TODOS los pedidos?",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    # 🔥 BORRAR
+    elif query.data == "confirmar_borrar":
+
+        pedidos.clear()
+        guardar_json(PEDIDOS_FILE, pedidos)
+
+        await query.message.reply_text("🗑 Todos los pedidos fueron eliminados")
+
+    # 🔥 CANCELAR
+    elif query.data == "cancelar_borrar":
+
+        await query.message.reply_text("❌ Operación cancelada")
 # ------------------------
 # PUBLICACIONES
 # ------------------------
@@ -1170,5 +1690,9 @@ app.add_handler(CallbackQueryHandler(activar17, pattern="^f17_"))
 app.add_handler(CallbackQueryHandler(completar_pedido, pattern="^completar_"))
 app.add_handler(CallbackQueryHandler(boton_comandos_admin, pattern="comando"))
 app.add_handler(CallbackQueryHandler(boton_respuestas, pattern="respuestas"))
+app.add_handler(CallbackQueryHandler(mantenimiento_botones, pattern="mantenimiento_"))
+app.add_handler(CallbackQueryHandler(actualizacion_botones, pattern="update_"))
+app.add_handler(CallbackQueryHandler(borrar_pedidos_botones, pattern="^(borrar_todos|confirmar_borrar|cancelar_borrar)$"))
+app.add_handler(CallbackQueryHandler(admin_panel))
 
 app.run_polling()
